@@ -1,8 +1,9 @@
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
-    }
-}
+extern crate core;
+
+pub mod api;
+pub mod error;
+pub mod logger;
+pub mod middleware;
+pub mod repository;
+pub mod settings;
+pub mod util;
