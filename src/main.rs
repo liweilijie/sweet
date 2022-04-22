@@ -11,7 +11,7 @@ use sweet::settings::Settings;
 use tower::ServiceBuilder;
 use tower_http::compression::CompressionLayer;
 use tower_http::trace::TraceLayer;
-use tracing::info;
+use tracing::{debug, info};
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
@@ -32,6 +32,7 @@ async fn main() -> Result<(), Error> {
     let port = settings.app_port.unwrap_or(8080);
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
     info!("Starting server on {addr}");
+    debug!("debug enable.");
 
     Server::bind(&addr)
         .serve(routes.into_make_service())

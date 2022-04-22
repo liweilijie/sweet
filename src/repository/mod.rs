@@ -1,9 +1,17 @@
+pub mod dao;
+pub mod dto;
+pub mod vo;
+
+mod traits;
+pub use traits::Dao;
+
 use once_cell::sync::Lazy;
 use rbatis::logic_delete::RbatisLogicDeletePlugin;
-use rbatis::rbatis::Rbatis;
+use rbatis::{core::Error, rbatis::Rbatis};
 use std::env;
 
 pub type DBPool = Rbatis;
+pub type DBError = Error;
 
 const DATABASE_URL: &str = "DATABASE_URL";
 pub static POOL: Lazy<DBPool> = Lazy::new(|| {

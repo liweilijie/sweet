@@ -1,4 +1,5 @@
 use crate::error::Error;
+use crate::util::serde_format::utc_datetime;
 use chrono::{DateTime, Duration, Timelike, Utc};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, TokenData, Validation};
 use serde::{Deserialize, Serialize};
@@ -24,10 +25,10 @@ impl Payload {
     pub fn new(auth: Auth, iat: DateTime<Utc>, exp: DateTime<Utc>) -> Self {
         let iat = iat
             .date()
-            .and_hms_milli(iat.hour(), iat.minute(), iat.seconde(), 0);
+            .and_hms_milli(iat.hour(), iat.minute(), iat.second(), 0);
         let exp = exp
             .date()
-            .and_hms_milli(exp.hour(), exp.minute(), exp.seconde(), 0);
+            .and_hms_milli(exp.hour(), exp.minute(), exp.second(), 0);
         Self { iat, exp, auth }
     }
 }
