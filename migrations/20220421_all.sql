@@ -49,17 +49,3 @@ CREATE TABLE `medicinal` (
   UNIQUE KEY `idx_category_medicinal_name` (`user_id`, `category_id`, `name`),
   CONSTRAINT `fk-medicinal-users` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`)
 );
-
-DROP TABLE IF EXISTS `med_cate`;
-
-CREATE TABLE `med_cate`(
-  `medicinal_id` int(10) unsigned NOT NULL,
-  `category_id` int(10) unsigned NOT NULL,
-  `user_id` VARCHAR(128) NOT NULL,
-  `is_deleted` INT(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`medicinal_id`, `category_id`),
-  UNIQUE KEY `idx_muli_id` (`medicinal_id`, `category_id`, `user_id`),
-  CONSTRAINT `fk-medicinal_category-users` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`),
-  CONSTRAINT `fk-medicinal_has_category-medicinal` FOREIGN KEY (`medicinal_id`) REFERENCES `medicinal`(`id`),
-  CONSTRAINT `fk-medicinal_has_medicinal-category` FOREIGN KEY (`category_id`) REFERENCES `category`(`id`)
-);

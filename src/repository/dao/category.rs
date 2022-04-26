@@ -1,9 +1,7 @@
 use crate::error::Error;
-use crate::repository::{DBError, Dao, POOL};
+use crate::repository::POOL;
 use crate::util::serde_format::{i32_bool, naive_datetime};
-use app_macro::Dao;
 use async_trait::async_trait;
-use rbatis::{crud::CRUD, crud_table, wrapper::Wrapper};
 use serde::Serialize;
 
 #[crud_table(table_name: "category")]

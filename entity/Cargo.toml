@@ -1,0 +1,21 @@
+[package]
+name = "entity"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde = { version = "1.0.136", features = ["derive"] }
+sea-orm = { version = "0.7.1", features = ["runtime-tokio-rustls", "sqlx-all", "macros", "with-chrono", "debug-print"], default-features = false }
+chrono = "0.4.19"
+
+[dev-dependencies]
+rand = "0.8.5"
+tokio-test = "*"
+tokio = { version = "1.17.0", features = ["full"] }
+tracing = "0.1.29"
+tracing-subscriber = { version = "0.3.2", features = ["time", "local-time", "env-filter"] }
+uuid = { version = "0.8.2", features = ["serde", "v4"] }
+bcrypt = "0.10.1"

@@ -2,28 +2,23 @@ pub mod dao;
 pub mod dto;
 pub mod vo;
 
-mod traits;
-pub use traits::Dao;
-
 use once_cell::sync::Lazy;
-use rbatis::logic_delete::RbatisLogicDeletePlugin;
-use rbatis::{core::Error, rbatis::Rbatis};
+use sea_orm::{ConnectOptions, Database, DatabaseConnection};
 use std::env;
-
-pub type DBPool = Rbatis;
-pub type DBError = Error;
+use std::time::Duration;
 
 const DATABASE_URL: &str = "DATABASE_URL";
-pub static POOL: Lazy<DBPool> = Lazy::new(|| {
-    let mut rb = Rbatis::new();
-    rb.set_logic_plugin(RbatisLogicDeletePlugin::new_opt("is_deleted", 1, 0));
-    rb
-});
+pub static POOL: Lazy<DatabaseConnection> = Lazy::new(|| {
+    dotenv::dotenv().ok();
+    let db_url = env::var("DATABASE_URL").expect("DATABASE_URL is not set in .env file");
+    let mut opt = ConnectOptions::new(db_url);
+    opt.max_connections(100)
+        .min_connections(5)
+        .connect_timeout(Duration::from_secs(10))
+        .idle_timeout(Duration::from_secs(10))
+        .max_lifetime(Duration::from_secs(10))
+        .sqlx_logging(true);
 
-pub async fn init_db() {
-    let database_url =
-        env::var(DATABASE_URL).expect("environment variable DATABASE_URL must be set");
-    POOL.link(&database_url)
-        .await
-        .expect("connect to database failed.");
-}
+    let db = Database::connect(opt).await.unwrap();
+    db
+});
