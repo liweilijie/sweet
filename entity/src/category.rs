@@ -16,7 +16,7 @@ use sea_orm::entity::prelude::*;
 #[sea_orm(table_name = "category")]
 pub struct Model {
     #[sea_orm(primary_key)]
-    pub id: i32,
+    pub id: u32,
     #[sea_orm(unique)]
     pub name: String,
     #[sea_orm(unique)]
@@ -28,9 +28,9 @@ pub enum Relation {
     #[sea_orm(has_many = "super::medicinal::Entity")]
     Medicinal,
     #[sea_orm(
-    belongs_to = "super::user::Entity",
-    from = "Column::UserId",
-    to = "super::user::Column::Id"
+        belongs_to = "super::user::Entity",
+        from = "Column::UserId",
+        to = "super::user::Column::Id"
     )]
     User,
 }

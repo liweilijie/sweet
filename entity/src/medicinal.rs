@@ -1,5 +1,5 @@
-use sea_orm::entity::prelude::*;
 use chrono::NaiveDate;
+use sea_orm::entity::prelude::*;
 use sea_orm::prelude::DateTimeWithTimeZone;
 
 // create medicinal table
@@ -28,7 +28,7 @@ use sea_orm::prelude::DateTimeWithTimeZone;
 #[sea_orm(table_name = "medicinal")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = true)]
-    pub id: i32,
+    pub id: u32,
     #[sea_orm(column_name = "category_id")]
     pub category_id: i32,
     #[sea_orm(column_name = "name")]
@@ -37,11 +37,11 @@ pub struct Model {
     pub batch_info: Option<String>,
     #[sea_orm(column_name = "spec")]
     pub spec: Option<String>,
-    #[sea_orm(column_name = "count")]
+    #[sea_orm(column_name = "count", default_value = "1")]
     pub count: Option<String>,
     #[sea_orm(column_name = "validity")]
     pub validity: NaiveDate,
-    #[sea_orm(column_name = "is_deleted")]
+    #[sea_orm(column_name = "is_deleted", default_value = "0")]
     pub is_deleted: i32,
     #[sea_orm(column_name = "created_at")]
     pub created_at: DateTimeWithTimeZone,
@@ -50,22 +50,21 @@ pub struct Model {
     #[sea_orm(column_name = "notify_at")]
     pub notify_at: Option<DateTimeWithTimeZone>,
     #[sea_orm(column_name = "user_id")]
-    #[sea_orm(primary_key)]
     pub user_id: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
     #[sea_orm(
-    belongs_to = "super::category::Entity",
-    from = "Column::CategoryId",
-    to = "super::category::Column::Id"
+        belongs_to = "super::category::Entity",
+        from = "Column::CategoryId",
+        to = "super::category::Column::Id"
     )]
     Category,
     #[sea_orm(
-    belongs_to = "super::user::Entity",
-    from = "Column::UserId",
-    to = "super::user::Column::Id"
+        belongs_to = "super::user::Entity",
+        from = "Column::UserId",
+        to = "super::user::Column::Id"
     )]
     User,
 }
