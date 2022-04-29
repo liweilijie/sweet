@@ -19,7 +19,7 @@ mod tests {
     use sea_orm::ActiveValue::NotSet;
     use sea_orm::{entity::*, error::*, query::*, DbConn, FromQueryResult};
     use sea_orm::{Database, DatabaseConnection};
-    use tracing::info;
+    use tracing::{error, info};
     use tracing_subscriber::layer::SubscriberExt;
     use tracing_subscriber::util::SubscriberInitExt;
     use uuid::Uuid;
@@ -52,7 +52,11 @@ mod tests {
 
         // create_category(&db).await?;
 
-        create_medicinal(&db).await?;
+        // create_medicinal(&db).await?;
+
+        // find_by_user_id(&db).await?;
+
+        update_category(&db).await?;
 
         Ok(())
     }
@@ -61,7 +65,7 @@ mod tests {
         let users: Vec<user::Model> = User::find().all(db).await?;
 
         for user in users.iter() {
-            info!("{}:{}", user.username, user.password);
+            info!("{}:{}:{}", user.username, user.password, user.id);
         }
 
         Ok(())
@@ -81,6 +85,8 @@ mod tests {
             .take(7)
             .map(char::from)
             .collect();
+
+        // let name = "dada".to_string();
 
         info!("{}: {:?}", name, now);
 
@@ -124,7 +130,7 @@ mod tests {
     }
 
     async fn find_by_id(db: &DbConn) -> Result<(), DbErr> {
-        let id = "899b2b59-8f39-484e-9d78-6182de985fdc";
+        let id = "afc67952-c38e-4b3d-a235-63ad02718372";
         let user = User::find_by_id(id.to_owned()).one(db).await?;
 
         info!("found one user: {:?}", user);
@@ -145,7 +151,7 @@ mod tests {
         // // Update corresponding row in database using primary key value
         // let pear: fruit::Model = pear.update(db).await?;
 
-        let id = "899b2b59-8f39-484e-9d78-6182de985fdc";
+        let id = "afc67952-c38e-4b3d-a235-63ad02718372";
         let user: Option<user::Model> = User::find_by_id(id.to_owned()).one(db).await?;
 
         let mut user: user::ActiveModel = user.unwrap().into();
@@ -176,8 +182,9 @@ mod tests {
 
         // let category = "手术室";
         // let user_id = "899b2b59-8f39-484e-9d78-6182de985fdc";
-        let category = "儿童保健科";
-        let user_id = "10ce6922-0eea-40e0-9e90-674b6909b83e";
+        let category = "产科dada03";
+        // let user_id = "afc67952-c38e-4b3d-a235-63ad02718372"; // liwei
+        let user_id = "43f2e842-ff52-4ccc-b239-ffb9a642a652"; // dada
 
         let category = category::ActiveModel {
             id: NotSet,
@@ -193,10 +200,38 @@ mod tests {
         Ok(())
     }
 
+    async fn is_valid_category(
+        db: &DbConn,
+        category_id: u32,
+        user_id: &str,
+    ) -> Result<bool, DbErr> {
+        let category = Category::find()
+            .filter(
+                Condition::all()
+                    .add(category::Column::Id.eq(category_id))
+                    .add(category::Column::UserId.eq(user_id)),
+            )
+            .one(db)
+            .await?;
+
+        info!("found category: {:?}", category);
+
+        if category.is_none() {
+            return Ok(false);
+        }
+
+        Ok(true)
+    }
+
     async fn create_medicinal(db: &DbConn) -> Result<(), DbErr> {
-        let category_id = 3;
-        // let user_id = "10ce6922-0eea-40e0-9e90-674b6909b83e";
-        let user_id = "899b2b59-8f39-484e-9d78-6182de985fdc";
+        let category_id: u32 = 4;
+        let user_id = "afc67952-c38e-4b3d-a235-63ad02718372"; // liwei
+
+        if !is_valid_category(db, category_id, user_id).await? {
+            error!("category_id or user_id is valid");
+            return Err(DbErr::Custom("category_id is invalid".to_owned()));
+        }
+        // let user_id = "43f2e842-ff52-4ccc-b239-ffb9a642a652"; // dada
         let now = FixedOffset::east(8 * 3600)
             .from_local_datetime(&Local::now().naive_local())
             .unwrap();
@@ -233,13 +268,13 @@ mod tests {
         // pub user_id: String,
         let medicinal = medicinal::ActiveModel {
             category_id: Set(category_id),
-            name: Set("测视力仪器005".to_owned()),
+            name: Set("产科-测视力仪器003".to_owned()),
             batch_info: Set(Some("20200205".to_owned())),
             spec: Set(None),
             validity: Set(date),
             user_id: Set(user_id.to_owned()),
             created_at: Set(now),
-            updated_at: Set(now),
+            updated_at: Set(Some(now)),
             ..Default::default()
         };
 
@@ -247,6 +282,74 @@ mod tests {
         let medicinal: medicinal::ActiveModel = medicinal.save(db).await?;
 
         info!("inserted medicinal: {:?}", medicinal);
+
+        Ok(())
+    }
+
+    async fn find_by_user_id(db: &DbConn) -> Result<(), DbErr> {
+        let category_id: u32 = 4;
+        let user_id = "afc67952-c38e-4b3d-a235-63ad02718372"; // liwei
+
+        if !is_valid_category(db, category_id, user_id).await? {
+            error!("category_id or user_id is valid");
+            return Err(DbErr::Custom("category_id is invalid".to_owned()));
+        }
+        // let user_id = "43f2e842-ff52-4ccc-b239-ffb9a642a652"; // dada
+
+        let medicinals = Medicinal::find()
+            .filter(medicinal::Column::UserId.eq(user_id))
+            .order_by_asc(medicinal::Column::CreatedAt)
+            .all(db)
+            .await?;
+
+        for medicinal in medicinals.iter() {
+            info!(
+                "medicinal: {}=>{}:{}:{}",
+                medicinal.category_id, medicinal.name, medicinal.validity, medicinal.created_at
+            );
+        }
+
+        // related find
+        //     let cake_with_fruits: Vec<(cake::Model, Vec<fruit::Model>)> = Cake::find()
+        // .find_with_related(Fruit)
+        // .all(db)
+        // .await?;
+
+        let category_with_medicinal: Vec<(category::Model, Vec<medicinal::Model>)> =
+            Category::find()
+                .find_with_related(Medicinal)
+                .filter(medicinal::Column::UserId.eq(user_id))
+                .order_by_asc(medicinal::Column::CreatedAt)
+                .all(db)
+                .await?;
+
+        for r in category_with_medicinal.iter() {
+            info!("category: {:?}", r.0);
+            for m in r.1.iter() {
+                info!("medicinal: {:?}", m);
+            }
+        }
+
+        Ok(())
+    }
+
+    async fn update_category(db: &DbConn) -> Result<(), DbErr> {
+        // let pear: Option<fruit::Model> = Fruit::find_by_id(28).one(db).await?;
+
+        // // Into ActiveModel
+        // let mut pear: fruit::ActiveModel = pear.unwrap().into();
+
+        // // Update name attribute
+        // pear.name = Set("Sweet pear".to_owned());
+
+        // // Update corresponding row in database using primary key value
+        // let pear: fruit::Model = pear.update(db).await?;
+
+        let category: Option<category::Model> = Category::find_by_id(3).one(db).await?;
+        let mut category: category::ActiveModel = category.unwrap().into();
+        category.name = Set(format!("更新过：{}", category.name.as_ref()));
+
+        let category: category::Model = category.update(db).await?;
 
         Ok(())
     }

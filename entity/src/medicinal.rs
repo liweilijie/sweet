@@ -30,7 +30,7 @@ pub struct Model {
     #[sea_orm(primary_key, auto_increment = true)]
     pub id: u32,
     #[sea_orm(column_name = "category_id")]
-    pub category_id: i32,
+    pub category_id: u32,
     #[sea_orm(column_name = "name")]
     pub name: String,
     #[sea_orm(column_name = "batch_info")]
@@ -46,7 +46,7 @@ pub struct Model {
     #[sea_orm(column_name = "created_at")]
     pub created_at: DateTimeWithTimeZone,
     #[sea_orm(column_name = "updated_at")]
-    pub updated_at: DateTimeWithTimeZone,
+    pub updated_at: Option<DateTimeWithTimeZone>,
     #[sea_orm(column_name = "notify_at")]
     pub notify_at: Option<DateTimeWithTimeZone>,
     #[sea_orm(column_name = "user_id")]
